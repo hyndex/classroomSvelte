@@ -6,7 +6,6 @@
     const dispatch = createEventDispatcher();
 
     export let editingPost;
-    
     $: title=editingPost.name;
     $: body=editingPost.description;
 

@@ -6,6 +6,7 @@
     import GroupFrom from '../components/GroupForm.svelte';
     let loading=false;
     let posts=[];
+    let roles=[];
     let editingPost={
         name:'',
         description:'',
@@ -28,8 +29,33 @@
     })
 
 function editPost(post){
-    editingPost=post
+    editingPost=post;
 }
+function clearRoles(){
+    console.log('clear')
+    return roles = [];
+}
+
+async function getRoles(id) {
+        await fetch(apiBaseUrl+'/add/?search='+id,{
+            method: "GET",
+            credentials: "include",
+            headers: {
+                "Content-type": "application/json",
+                "Accept": "application/json",
+                'Authorization': 'Token ' + $authtoken
+            },
+        }).then(async data => {
+            if (data.status < 300) {
+                roles = await data.json();
+                const cookies = new Cookies();
+            }
+            else{
+                response= await data.json();
+                console.log(response)
+            }
+        })
+    }
 
 function deletePost(id){
     if(confirm("Are you sure?")){
@@ -92,6 +118,9 @@ function setLimit() {
 </style>
 
 {#if $authtoken != false}
+    {#if roles.length != 0}
+        <button on:click={clearRoles} class="waves-effect waves-light btn">clear</button>
+    {/if}
      <div class="row">
         <div class="col s6">
             <GroupFrom on:postCreated={addPost} editingPost={editingPost}/>
@@ -119,6 +148,29 @@ function setLimit() {
                         <div class="card-action">
                             <a href="#" on:click={() => editPost(post)}>Edit</a>
                             <a href="#" class="delete-btn" on:click={() => deletePost(post.id)}>Delete</a>
+                            <a href="#" on:click={() => getRoles(post.id)}>Roles</a>
+                        </div>
+                    </div>
+                </div>
+            {/each}
+        {/if}
+    </div>
+
+
+        <div class="row">
+        {#if roles.length === 0}
+            <h1>No group selected ...</h1>
+        {:else}
+            {#each roles as role}
+                <div class="col s6">
+                    <div class="card">
+                        <div class="card-content">
+                            <p class="card-title">{role.profile.name}</p>
+                            <p class="body">{role.profile.user.username}</p>
+                            <p class="body">{role.role}</p>
+                        </div>
+                        <div class="card-action">
+                            <!-- <a href="#" class="delete-btn">Delete</a> -->
                         </div>
                     </div>
                 </div>

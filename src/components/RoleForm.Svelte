@@ -6,8 +6,8 @@
     const dispatch = createEventDispatcher();
     export let editingPost;
 
-    $: name=editingPost.name;
-    $: description=editingPost.description;
+    let profile=''
+    let role=''
     
     let loading=false;
 
@@ -23,18 +23,17 @@
         loading=true;
         let url, method;
 
-        if(editingPost.id){
-            url=`${apiBaseUrl}/post/${editingPost.id}`
-            method='PUT'
-        }
-        else{
-            url=`${apiBaseUrl}/post`
-            method='POST'
-        }
+        url=`${apiBaseUrl}/add/`;
+        method='POST';
+
 
         const response = await fetch(url,{
             method: method,
-            body:JSON.stringify(newPost),
+            body:JSON.stringify({
+                groupid:editingPost.id,
+                username: profile,
+                role: role
+            }),
             credentials: 'include',
             headers: {
                 "Content-type": "application/json",
@@ -61,13 +60,17 @@
 {#if loading === false}
      <form on:submit={onSubmit}>
         <div class="input-field">
-            <label for="title">Name</label>
-            <input type="Text" bind:value={editingPost.name}/>
+            <label for="title">groupid</label>
+            <input type="Text" disabled="disabled" bind:value={editingPost.name}/>
         </div>
         <div class="input-field">
-            <label for="body">Description</label>
-            <input type="Text" bind:value={editingPost.description}/>
+            <label for="body">username/phone</label>
+            <input type="Text" bind:value={profile}/>
         </div>
+        <select class="custom-select" bind:value={role}>
+            <option value="student">student</option>
+            <option value="teacher">One</option>
+        </select>
         <button type="submit" class="waves-effect waves-light btn">
         {editingPost.id ? 'Update' : 'Add'}
         </button>
