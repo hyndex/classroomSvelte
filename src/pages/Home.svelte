@@ -1,18 +1,29 @@
 <script>
+    import Cookies from 'universal-cookie';
+    import { server, authtoken, username, email, phone, name } from '../store/stores.js';
+    let apiBaseUrl=$server
     import { onMount } from 'svelte';
-    import PostFrom from '../components/PostForm.svelte';
-    const apiBaseUrl='https://ndb99xkpdk.execute-api.eu-west-2.amazonaws.com/dev';
-    let posts=[];
+    import GroupFrom from '../components/GroupForm.svelte';
     let loading=false;
+    let posts=[];
     let editingPost={
-        body:'',
-        title:'',
+        name:'',
+        description:'',
         id:null
     }
     let postLimit = 10;
 
     onMount( async () => {
-        const res = await fetch(apiBaseUrl+'/posts');
+        // authtoken.set(new Cookies.get('token'));
+        const res = await fetch(apiBaseUrl+'/group/',{
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                "Content-type": "application/json",
+                'Accept': 'application/json',
+                'Authorization': 'Token ' + $authtoken
+            }
+        });
         posts= await res.json()
     })
 
@@ -22,10 +33,18 @@ function editPost(post){
 
 function deletePost(id){
     if(confirm("Are you sure?")){
-        fetch(`${apiBaseUrl}/post/${id}`,{
+        fetch(`${apiBaseUrl}/group/${id}`,{
             method:'DELETE',
-        }).then(res =>{
-            return res.json()
+            credentials: 'include',
+            headers: {
+                "Content-type": "application/json",
+                'Accept': 'application/json',
+                'Authorization': 'Token ' + $authtoken
+            }
+        }).then(async data => {
+            if (data.status < 300) {
+                console.log('success')
+            }
         }).then(()=>{
             posts=posts.filter(p => p.id !== id)
         });
@@ -41,14 +60,14 @@ function addPost({detail: post}){
       posts = postsUpdated;
     } else posts = [post, ...posts];
     editingPost={
-        body:'',
-        title:'',
+        name:'',
+        description:'',
         id:null
     }
 }
 
 function setLimit() {
-    fetch(`${apiBaseUrl}/posts/${postLimit}`)
+    fetch(`${apiBaseUrl}/group/${postLimit}`)
       .then(res => {
         return res.json();
       })
@@ -72,36 +91,39 @@ function setLimit() {
     }
 </style>
 
-<div class="row">
-    <div class="col s6">
-        <PostFrom on:postCreated={addPost} editingPost={editingPost}/>
+{#if $authtoken != false}
+     <div class="row">
+        <div class="col s6">
+            <GroupFrom on:postCreated={addPost} editingPost={editingPost}/>
+        </div>
+        <div class="col s3" style="margin:50px">
+            <p>Limit number of post </p>
+            <input type="number" bind:value={postLimit}/>
+            <button on:click={setLimit} class="waves-effect waves-light btn">Set</button>
+        </div>
     </div>
-    <div class="col s3" style="margin:50px">
-        <p>Limit number of post </p>
-        <input type="number" bind:value={postLimit}/>
-        <button on:click={setLimit} class="waves-effect waves-light btn">Set</button>
-    </div>
-</div>
 
 
-<div class="row">
-    {#if posts.length === 0}
-        <h1>loading posts ...</h1>
-    {:else}
-        {#each posts as post}
-             <div class="col s6">
-                <div class="card">
-                    <div class="card-content">
-                        <p class="card-title">{post.title}</p>
-                        <p class="timestamp">{post.createdAt}</p>
-                        <p class="body">{post.body}</p>
-                    </div>
-                    <div class="card-action">
-                        <a href="#" on:click={() => editPost(post)}>Edit</a>
-                        <a href="#" class="delete-btn" on:click={() => deletePost(post.id)}>Delete</a>
+    <div class="row">
+        {#if posts.length === 0}
+            <h1>loading posts ...</h1>
+        {:else}
+            {#each posts as post}
+                <div class="col s6">
+                    <div class="card">
+                        <div class="card-content">
+                            <p class="card-title">{post.name}</p>
+                            <p class="timestamp">{post.date_updated}</p>
+                            <p class="body">{post.description}</p>
+                        </div>
+                        <div class="card-action">
+                            <a href="#" on:click={() => editPost(post)}>Edit</a>
+                            <a href="#" class="delete-btn" on:click={() => deletePost(post.id)}>Delete</a>
+                        </div>
                     </div>
                 </div>
-             </div>
-        {/each}
-    {/if}
-</div>
+            {/each}
+        {/if}
+    </div>
+
+{/if}
