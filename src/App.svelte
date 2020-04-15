@@ -1,5 +1,7 @@
 <script>
+	import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 	import '../node_modules/materialize-css/dist/css/materialize.min.css'
+	import '../node_modules/bootstrap/dist/js/bootstrap.min.js'
 	import '../node_modules/materialize-css/dist/js/materialize.min.js'
 	import { Router, Route } from "svelte-routing";
 	import  Navbar  from './layout/Navbar.svelte';

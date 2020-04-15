@@ -13,6 +13,7 @@
         phone:'',
         password:'',
     }
+
     let token=false;
     onMount( async () =>{
         authtoken.set(new Cookies().get('token'));

@@ -14,7 +14,8 @@
         password:'',
     }
     let token=false;
-
+    let accountCreate=false
+    
     async function validateToken(){
         authtoken.set(new Cookies().get('token'));
         fetch('http://localhost:8000/users/profile/', {
