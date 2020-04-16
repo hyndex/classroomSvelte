@@ -1,6 +1,6 @@
 <script>
     import Cookies from 'universal-cookie';
-    import { server, authtoken, username, email, phone, name, selectedGroup,userid} from '../store/stores.js';
+    import { server, authtoken, username, email, phone, name, userid, selectedGroup, groupStore, assignmentStore, noteStore, roleStore} from '../store/stores.js';
     import NoteForm from '../components/NoteForm.svelte';
     import AssignmentForm from '../components/AssignmentForm.svelte';
     let apiBaseUrl=$server
@@ -17,6 +17,12 @@
         deadline: ""
     };
     let notes=[];
+    let editingNote = {
+        id: null,
+        title: "",
+        description: "",
+    };
+    
 
     onMount( async () =>{
         fetch($server+'/users/group/'+$selectedGroup+'/', {
@@ -48,7 +54,7 @@
         }).then(async data =>{
             if (data.status < 300) {
                 assignments = await data.json();
-                console.log(assignments)
+                assignmentStore.set(assignments)
             }
         })
 
@@ -63,33 +69,63 @@
         }).then(async data =>{
             if (data.status < 300) {
                 notes = await data.json();
-                console.log(notes)
+                noteStore.set(notes)
             }
         })
     })
 
-    function addAssignment({ detail: assignment }) {
-        console.log('assignment backcall',assignment)
-        if (assignments.find(p => p.id === assignment.id)) {
-            const index = assignments.findIndex(p => p.id === assignment.id);
-            let postsUpdated = assignments;
-            assignmentsUpdated.splice(index, 1, assignment);
-            assignments = assignmentsUpdated;
-        } 
-        else {
-            assignments = [assignment, ...assignments];
-        }
-        editingassignment = {
-            id: null,
-            title: "",
-            description: "",
-            deadline: ""
-        };
-    }
-
     function editAssignment(assignment) {
         editingAssignment = assignment;
     }
+    function editNote(note) {
+        editingNote = note;
+    }
+
+    function deleteAssignment(id){
+        if(confirm("Are you sure?")){
+            fetch(`${apiBaseUrl}/class/assignment/${id}`,{
+                method:'DELETE',
+                credentials: 'include',
+                headers: {
+                    "Content-type": "application/json",
+                    'Accept': 'application/json',
+                    'Authorization': 'Token ' + $authtoken
+                }
+            }).then(async data => {
+                if (data.status < 300) {
+                    console.log('success')
+                }
+            }).then(()=>{
+                assignments=$assignmentStore
+                assignments=assignments.filter(p => p.id !== id)
+                assignmentStore.set(assignments)
+            });
+        }
+        
+    }
+    function deleteNote(id){
+        if(confirm("Are you sure?")){
+            fetch(`${apiBaseUrl}/class/notes/${id}`,{
+                method:'DELETE',
+                credentials: 'include',
+                headers: {
+                    "Content-type": "application/json",
+                    'Accept': 'application/json',
+                    'Authorization': 'Token ' + $authtoken
+                }
+            }).then(async data => {
+                if (data.status < 300) {
+                    console.log('success')
+                }
+            }).then(()=>{
+                notes=$noteStore
+                notes=notes.filter(p => p.id !== id)
+                noteStore.set(notes)
+            });
+        }
+        
+    }
+
     async function getRoles(id) {
             await fetch(apiBaseUrl+'/add/?search='+id,{
                 method: "GET",
@@ -112,7 +148,8 @@
         }
 </script>
 {#if group.createdBy == $userid}
-            <AssignmentForm on:postCreated={addAssignment} {editingAssignment}/>
+            <AssignmentForm  {editingAssignment}/>
+            <NoteForm {editingNote}/>
 {/if}
 <h1>{group.createdBy}</h1>
 <h1>{$userid}</h1>
@@ -125,11 +162,13 @@
 <br/>
 <h3>Assignments</h3>
 
-{#each assignments as assignment}
+{#each $assignmentStore as assignment}
     title: {assignment.title}<br/>
-    description: {assignment.title}<br/>
+    description: {assignment.description}<br/>
     deadline{assignment.deadline}<br/>
-    attachment: {assignment.file? assignment.file:"No file attached"}<br/><hr/>
+    attachment: {assignment.file? assignment.file:"No file attached"}<br/>
+    <a href="#" on:click={() => editAssignment(assignment)}>Edit</a><br/>
+    <button class="delete-btn" on:click={() => deleteAssignment(assignment.id)}>Delete</button><br/><hr/>
 {/each}
 
 
@@ -138,8 +177,10 @@
 <br/>
 <h3>Notes</h3>
 
-{#each notes as note}
+{#each $noteStore as note}
     title: {note.title}<br/>
-    description: {note.title}<br/>
-    attachment: {note.file? note.file:"No file attached"}<br/><hr/>
+    description: {note.description}<br/>
+    attachment: {note.file? note.file:"No file attached"}<br/>
+    <a href="#" on:click={() => editNote(note)}>Edit</a><br/>
+    <button class="delete-btn" on:click={() => deleteNote(note.id)}>Delete</button><br/><hr/>
 {/each}

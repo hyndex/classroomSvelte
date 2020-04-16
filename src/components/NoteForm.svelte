@@ -1,7 +1,7 @@
 <script>
     import { createEventDispatcher } from 'svelte';
     import Cookies from 'universal-cookie';
-    import { server, authtoken, username, email, phone, name,selectedGroup } from '../store/stores.js';
+    import { server, authtoken, username, email, phone, name, userid, selectedGroup, groupStore, assignmentStore, noteStore, roleStore} from '../store/stores.js';
     let apiBaseUrl=$server
     const dispatch = createEventDispatcher();
     export let editingNote;
@@ -13,10 +13,9 @@
 
 
     async function onSubmit(event){
-        console.log('profile',profile)
-        console.log('role',userrole)
+
         event.preventDefault()
-        if(title.trim() === '' || descrtion.trim() === ''){
+        if(title.trim() === '' || description.trim() === ''){
             console.log('All data are not present')
             return
         }
@@ -32,7 +31,7 @@
         }
 
 
-        const response = await fetch(url,{
+        await fetch(url,{
             method: method,
             body:JSON.stringify({
                 groupid:$selectedGroup,
@@ -45,13 +44,21 @@
                 'Accept': 'application/json',
                 'Authorization': 'Token ' + $authtoken
             }
-        });
-
-        const role = await response.json()
+        }).then(async data =>{
+            if (data.status < 300) {
+                let note = await data.json();
+                if ($noteStore.find(p => p.id === note.id)) {
+                    const index = $noteStore.findIndex(p => p.id === note.id);
+                    let notesUpdated = $noteStore;
+                    notesUpdated.splice(index, 1, note);
+                    noteStore.set(notesUpdated);
+                } else noteStore.set([note, ...$noteStore]);
+            }
+            else{
+                let note = await data.json();
+            }
+        })
         loading = false;
-        dispatch('roleCreated',removeEventListener)
-        userrole=''
-        profile=''
     }
 </script>
 <style>
@@ -68,7 +75,7 @@
      <form on:submit={onSubmit}>
             <input type="Text" bind:value={editingNote.title} placeholder="Title"/>
             <input type="Text" bind:value={editingNote.description} placeholder="Description"/>
-            <button type="submit">Add ROle</button>
+            <button type="submit">{editingNote.id ? 'Update Note' : 'Add Note'}</button>
 
     </form>
     {:else}

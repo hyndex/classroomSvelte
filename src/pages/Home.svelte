@@ -1,6 +1,6 @@
 <script>
     import Cookies from 'universal-cookie';
-    import { server, authtoken, username, email, phone, name, selectedGroup} from '../store/stores.js';
+    import { server, authtoken, username, email, phone, name, userid, selectedGroup, groupStore, assignmentStore, noteStore, roleStore} from '../store/stores.js';
     import  Class  from './Class.svelte';
     import { Link, Route } from 'svelte-routing';
     let apiBaseUrl=$server
@@ -37,6 +37,7 @@
             }
         });
         groups= await res.json()
+        groupStore.set(groups)
     })
 
 function editGroup(group){
@@ -47,6 +48,7 @@ function focusRole(role){
 }
 function clearRoles(){
     console.log('clear')
+    roleStore.set([])
     return roles = [];
 }
 
@@ -62,6 +64,7 @@ async function getRoles(id) {
         }).then(async data => {
             if (data.status < 300) {
                 roles = await data.json();
+                roleStore.set(roles)
                 const cookies = new Cookies();
             }
             else{
@@ -86,7 +89,9 @@ function deleteGroup(id){
                 console.log('success')
             }
         }).then(()=>{
+            groups=$groupStore
             groups=groups.filter(p => p.id !== id)
+            groupStore.set(groups)
         });
     }
     
@@ -107,13 +112,16 @@ function deleteRole(id){
                 console.log('success')
             }
         }).then(()=>{
+            roles=$roleStore
             roles=roles.filter(p => p.id !== id)
+            roleStore.set(roles)
         });
     }
     
 }
 
 function addGroup({detail: group}){
+    groups=$groupStore
     if (groups.find(p => p.id === group.id)) {
       const index = groups.findIndex(p => p.id === group.id);
       let groupsUpdated = groups;
@@ -128,9 +136,11 @@ function addGroup({detail: group}){
         profile:[],
         date_updated:[]
     }
+    groupStore.set(groups)
 }
 
 function addRole({detail: role}){
+    roles=$roleStore
     if (roles.find(p => p.id === role.id)) {
       const index = roles.findIndex(p => p.id === role.id);
       let rolesUpdated = roles;
@@ -150,19 +160,11 @@ function gotoGroup(id){
 </script>
 
 <style>
-    .delete-btn{
-        color:red !important
-    }
 
-    .card .card-content .card-title{
-        margin-bottom: 0;
-    }
-    .card .card-content p.timestamp{
-        color: #999;
-        margin-bottom: 10px;
-    }
 </style>
 
+
+{console.log('store',$roleStore)}
 {#if $authtoken != false}
     {#if $selectedGroup != false}
          <Route path="/" component={Class} />
@@ -181,10 +183,10 @@ function gotoGroup(id){
 
 
     <div class="row">
-        {#if groups.length === 0}
+        {#if $groupStore.length === 0}
             <h1>loading groups ...</h1>
         {:else}
-            {#each groups as group}
+            {#each $groupStore as group}
                 <div class="col s6">
                     <div class="card">
                         <div class="card-content">
@@ -207,10 +209,10 @@ function gotoGroup(id){
 
 
         <div class="row">
-        {#if roles.length === 0}
+        {#if $roleStore.length === 0}
             <h1>No group selected ...</h1>
         {:else}
-            {#each roles as role}
+            {#each $roleStore as role}
                 <div class="col s6">
                     <div class="card">
                         <div class="card-content">

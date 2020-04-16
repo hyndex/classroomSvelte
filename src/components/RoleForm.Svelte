@@ -1,7 +1,7 @@
 <script>
     import { createEventDispatcher } from 'svelte';
     import Cookies from 'universal-cookie';
-    import { server, authtoken, username, email, phone, name } from '../store/stores.js';
+    import { server, authtoken, username, email, phone, name, userid, selectedGroup, groupStore, assignmentStore, noteStore, roleStore} from '../store/stores.js';
     let apiBaseUrl=$server
     const dispatch = createEventDispatcher();
     export let addingRole;
@@ -28,7 +28,7 @@
         method='POST';
 
 
-        const response = await fetch(url,{
+        await fetch(url,{
             method: method,
             body:JSON.stringify({
                 groupid:addingRole.id,
@@ -41,12 +41,20 @@
                 'Accept': 'application/json',
                 'Authorization': 'Token ' + $authtoken
             }
-        });
+        }).then(async data => {
+            if (data.status < 300) {
+                let roles = $roleStore
+                const role = await data.json();
+                roles=[role, ...roles]
+                roleStore.set(roles)
+            }
+            else{
+                const role= await data.json();
+            }
+        })
 
-        const role = await response.json()
         loading = false;
         dispatch('roleCreated',removeEventListener)
-        userrole=''
         profile=''
     }
 </script>

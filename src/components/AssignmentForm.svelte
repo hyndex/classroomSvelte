@@ -1,7 +1,7 @@
 <script>
     import { createEventDispatcher } from 'svelte';
     import Cookies from 'universal-cookie';
-    import { server, authtoken, username, email, phone, name,selectedGroup } from '../store/stores.js';
+    import { server, authtoken, username, email, phone, name, userid, selectedGroup, groupStore, assignmentStore, noteStore, roleStore} from '../store/stores.js';
     let apiBaseUrl=$server
     const dispatch = createEventDispatcher();
     export let editingAssignment;
@@ -34,7 +34,7 @@
         }
 
 
-        const response = await fetch(url,{
+        await fetch(url,{
             method: method,
             body:JSON.stringify({
                 groupid:$selectedGroup,
@@ -48,11 +48,22 @@
                 'Accept': 'application/json',
                 'Authorization': 'Token ' + $authtoken
             }
-        });
-
-        const role = await response.json()
+        }).then(async data =>{
+            if (data.status < 300) {
+                let assignment = await data.json();
+                if ($assignmentStore.find(p => p.id === assignment.id)) {
+                    const index = $assignmentStore.findIndex(p => p.id === assignment.id);
+                    let assignmentsUpdated = $assignmentStore;
+                    assignmentsUpdated.splice(index, 1, assignment);
+                    assignmentStore.set(assignmentsUpdated);
+                } else assignmentStore.set([assignment, ...$assignmentStore]);
+                
+            }
+            else{
+                let assignment = await data.json();
+            }
+        })
         loading = false;
-        dispatch('roleCreated',removeEventListener)
     }
 </script>
 <style>
@@ -64,13 +75,13 @@
         margin: 100px, 0;
     }
 </style>
-
+{console.log(editingAssignment)}
 {#if loading === false}
      <form on:submit={onSubmitAssignment}>
             <input type="Text" bind:value={editingAssignment.title} placeholder="Title"/>
             <input type="Text" bind:value={editingAssignment.description} placeholder="Description"/>
             <input type="Text" bind:value={editingAssignment.deadline} placeholder="Deadline yyyymmdd"/>
-            <button type="submit">Add Assignment</button>
+            <button type="submit"><button type="submit">{editingAssignment.id ? 'Update Assignment' : 'Add Assignment'}</button></button>
 
     </form>
     {:else}

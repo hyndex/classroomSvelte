@@ -99,6 +99,7 @@
                 console.log(response)
             }
         });
+        validateToken()
     }
 
     async function logOut(){

@@ -17,3 +17,7 @@ export const email = writable(false);
 export const phone = writable(false);
 export const status = writable(false);
 export const selectedGroup = writable(false);
+export const groupStore = writable([]);
+export const assignmentStore = writable([]);
+export const noteStore = writable([]);
+export const roleStore = writable([]);
