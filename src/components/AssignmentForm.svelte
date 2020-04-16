@@ -11,7 +11,7 @@
     $: deadline=editingAssignment.deadline;
     
     let loading=false;
-
+    let files;
 
     async function onSubmitAssignment(event){
         event.preventDefault()
@@ -81,6 +81,7 @@
             <input type="Text" bind:value={editingAssignment.title} placeholder="Title"/>
             <input type="Text" bind:value={editingAssignment.description} placeholder="Description"/>
             <input type="Text" bind:value={editingAssignment.deadline} placeholder="Deadline yyyymmdd"/>
+            <input type="file" bind:files>
             <button type="submit"><button type="submit">{editingAssignment.id ? 'Update Assignment' : 'Add Assignment'}</button></button>
 
     </form>
