@@ -1,6 +1,7 @@
 <script>
     import Cookies from 'universal-cookie';
-    import { server, authtoken, username, email, phone, name } from '../store/stores.js';
+    import { server, authtoken, username, email, phone, name, selectedGroup} from '../store/stores.js';
+    import { Link, Route } from 'svelte-routing';
     let apiBaseUrl=$server
     import { onMount } from 'svelte';
     import GroupFrom from '../components/GroupForm.svelte';
@@ -18,8 +19,9 @@
         role:'',
         groupid:null
     }
-
+    let gotoGroupstatus=false;
     onMount( async () => {
+        selectedGroup.set(false)
         // authtoken.set(new Cookies.get('token'));
         const res = await fetch(apiBaseUrl+'/group/',{
             method: 'GET',
@@ -135,6 +137,10 @@ function addRole({detail: role}){
     }
 }
 
+function gotoGroup(id){
+    selectedGroup.set(id);
+    gotoGroup=true;
+}
 </script>
 
 <style>
@@ -152,6 +158,9 @@ function addRole({detail: role}){
 </style>
 
 {#if $authtoken != false}
+    {#if gotoGroupstatus === true}
+         <Route path="/" component={Class} />
+    {/if}
     {#if roles.length != 0}
         <button on:click={clearRoles} class="waves-effect waves-light btn">clear</button>
     {/if}
@@ -179,6 +188,7 @@ function addRole({detail: role}){
                         </div>
                         <div class="card-action">
                             <a href="#" on:click={() => editPost(post)}>Edit</a>
+                            <Link to='/class' on:click={()=>gotoGroup(post.id)}>Enter</Link>
                             <a href="#" class="delete-btn" on:click={() => deletePost(post.id)}>Delete</a>
                             <a href="#" on:click={() => getRoles(post.id)}>Roles</a>
                             <a href="#" on:click={() => focusRole(post)}>Add Roles</a>

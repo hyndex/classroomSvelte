@@ -1,6 +1,6 @@
 <script>
     import Cookies from 'universal-cookie';
-    import { server, authtoken, username, email, phone, name } from '../store/stores.js';
+    import { server, authtoken, username, email, phone, name, userid } from '../store/stores.js';
     let apiBaseUrl=$server
     import { onMount } from 'svelte';
     let loading=false;
@@ -33,6 +33,7 @@
                 name.set(response.name)
                 phone.set(response.phone)
                 email.set(response.user.email)
+                userid.set(response.id)
             }
             else{
                 authtoken.set(false)
