@@ -5,9 +5,9 @@
     let apiBaseUrl=$server
     const dispatch = createEventDispatcher();
 
-    export let editingPost;
-    $: title=editingPost.name;
-    $: body=editingPost.description;
+    export let editingGroup;
+    $: title=editingGroup.name;
+    $: body=editingGroup.description;
 
     let loading=false;
 
@@ -17,13 +17,13 @@
             console.log('All data are not present')
             return
         }
-        const newPost = {title , body}
+        const newGroup = {title , body}
 
         loading=true;
         let url, method;
 
-        if(editingPost.id){
-            url=`${apiBaseUrl}/group/${editingPost.id}/`
+        if(editingGroup.id){
+            url=`${apiBaseUrl}/group/${editingGroup.id}/`
             method='PUT'
         }
         else{
@@ -37,7 +37,7 @@
         const response = await fetch(url,{
             method: method,
             body:JSON.stringify({
-                id:editingPost.id,
+                id:editingGroup.id,
                 name: title,
                 description: body
             }),
@@ -49,9 +49,9 @@
             }
         });
 
-        const post = await response.json()
+        const group = await response.json()
         loading = false;
-        dispatch('postCreated',post)
+        dispatch('groupCreated',group)
     }
 </script>
 <style>
@@ -66,12 +66,16 @@
 
 {#if loading === false}
      <form on:submit={onSubmit}>
+        <div class="input-field">
             <label for="title">Title</label>
-            <input type="Text" bind:value={editingPost.name}/>
+            <input type="Text" bind:value={editingGroup.name}/>
+        </div>
+        <div class="input-field">
             <label for="body">Body</label>
-            <input type="Text" bind:value={editingPost.description}/>
-        <button type="submit">
-        {editingPost.id ? 'Update' : 'Add'}
+            <input type="Text" bind:value={editingGroup.description}/>
+        </div>
+        <button type="submit" class="waves-effect waves-light btn">
+        {editingGroup.id ? 'Update' : 'Add'}
         </button>
 
     </form>

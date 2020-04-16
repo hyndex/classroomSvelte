@@ -1,21 +1,25 @@
 <script>
     import Cookies from 'universal-cookie';
     import { server, authtoken, username, email, phone, name, selectedGroup} from '../store/stores.js';
+    import  Class  from './Class.svelte';
     import { Link, Route } from 'svelte-routing';
     let apiBaseUrl=$server
     import { onMount } from 'svelte';
     import GroupFrom from '../components/GroupForm.svelte';
     import RoleFrom from '../components/RoleForm.svelte';
     let loading=false;
-    let posts=[];
+    let groups=[];
     let roles=[];
-    let editingPost={
+    let editingGroup={
         name:'',
         description:'',
         id:null
     }
     let addingRole={
         username:'',
+        group:[],
+        profile:[],
+        profile:[],
         role:'',
         groupid:null
     }
@@ -32,11 +36,11 @@
                 'Authorization': 'Token ' + $authtoken
             }
         });
-        posts= await res.json()
+        groups= await res.json()
     })
 
-function editPost(post){
-    editingPost=post;
+function editGroup(group){
+    editingGroup=group;
 }
 function focusRole(role){
     addingRole=role;
@@ -67,7 +71,7 @@ async function getRoles(id) {
         })
     }
 
-function deletePost(id){
+function deleteGroup(id){
     if(confirm("Are you sure?")){
         fetch(`${apiBaseUrl}/group/${id}`,{
             method:'DELETE',
@@ -82,7 +86,7 @@ function deletePost(id){
                 console.log('success')
             }
         }).then(()=>{
-            posts=posts.filter(p => p.id !== id)
+            groups=groups.filter(p => p.id !== id)
         });
     }
     
@@ -109,17 +113,20 @@ function deleteRole(id){
     
 }
 
-function addPost({detail: post}){
-    if (posts.find(p => p.id === post.id)) {
-      const index = posts.findIndex(p => p.id === post.id);
-      let postsUpdated = posts;
-      postsUpdated.splice(index, 1, post);
-      posts = postsUpdated;
-    } else posts = [post, ...posts];
-    editingPost={
+function addGroup({detail: group}){
+    if (groups.find(p => p.id === group.id)) {
+      const index = groups.findIndex(p => p.id === group.id);
+      let groupsUpdated = groups;
+      groupsUpdated.splice(index, 1, group);
+      groups = groupsUpdated;
+    } else groups = [group, ...groups];
+    editingGroup={
         name:'',
         description:'',
-        id:null
+        id:null,
+        group:[],
+        profile:[],
+        date_updated:[]
     }
 }
 
@@ -139,7 +146,6 @@ function addRole({detail: role}){
 
 function gotoGroup(id){
     selectedGroup.set(id);
-    gotoGroup=true;
 }
 </script>
 
@@ -158,7 +164,7 @@ function gotoGroup(id){
 </style>
 
 {#if $authtoken != false}
-    {#if gotoGroupstatus === true}
+    {#if $selectedGroup != false}
          <Route path="/" component={Class} />
     {/if}
     {#if roles.length != 0}
@@ -166,32 +172,32 @@ function gotoGroup(id){
     {/if}
      <div class="row">
         <div class="col s3">
-            <GroupFrom on:postCreated={addPost} editingPost={editingPost}/>
+            <GroupFrom on:groupCreated={addGroup} editingGroup={editingGroup}/>
         </div>
         <div class="col s3">
-            <RoleFrom on:postCreated={addRole} addingRole={addingRole}/>
+            <RoleFrom on:groupCreated={addRole} addingRole={addingRole}/>
         </div>
     </div>
 
 
     <div class="row">
-        {#if posts.length === 0}
-            <h1>loading posts ...</h1>
+        {#if groups.length === 0}
+            <h1>loading groups ...</h1>
         {:else}
-            {#each posts as post}
+            {#each groups as group}
                 <div class="col s6">
                     <div class="card">
                         <div class="card-content">
-                            <p class="card-title">{post.name}</p>
-                            <p class="timestamp">{post.date_updated}</p>
-                            <p class="body">{post.description}</p>
+                            <p class="card-title">{group.name}</p>
+                            <p class="timestamp">{group.date_updated}</p>
+                            <p class="body">{group.description}</p>
                         </div>
                         <div class="card-action">
-                            <a href="#" on:click={() => editPost(post)}>Edit</a>
-                            <Link to='/class' on:click={()=>gotoGroup(post.id)}>Enter</Link>
-                            <a href="#" class="delete-btn" on:click={() => deletePost(post.id)}>Delete</a>
-                            <a href="#" on:click={() => getRoles(post.id)}>Roles</a>
-                            <a href="#" on:click={() => focusRole(post)}>Add Roles</a>
+                            <a href="#" on:click={() => editGroup(group)}>Edit</a>
+                            <Link to='/class' on:click={()=>selectedGroup.set(group.id)}>Enter</Link>
+                            <a href="#" class="delete-btn" on:click={() => deleteGroup(group.id)}>Delete</a>
+                            <a href="#" on:click={() => getRoles(group.id)}>Roles</a>
+                            <a href="#" on:click={() => focusRole(group)}>Add Roles</a>
                         </div>
                     </div>
                 </div>

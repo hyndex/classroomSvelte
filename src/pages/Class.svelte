@@ -1,6 +1,8 @@
 <script>
-import Cookies from 'universal-cookie';
+    import Cookies from 'universal-cookie';
     import { server, authtoken, username, email, phone, name, selectedGroup,userid} from '../store/stores.js';
+    import NoteForm from '../components/NoteForm.svelte';
+    import AssignmentForm from '../components/AssignmentForm.svelte';
     let apiBaseUrl=$server
     import { onMount } from 'svelte';
     let loading=false;
@@ -8,6 +10,12 @@ import Cookies from 'universal-cookie';
     let group='';
     let owner=false;
     let assignments=[];
+    let editingAssignment = {
+        id: null,
+        title: "",
+        description: "",
+        deadline: ""
+    };
     let notes=[];
 
     onMount( async () =>{
@@ -60,7 +68,28 @@ import Cookies from 'universal-cookie';
         })
     })
 
+    function addAssignment({ detail: assignment }) {
+        console.log('assignment backcall',assignment)
+        if (assignments.find(p => p.id === assignment.id)) {
+            const index = assignments.findIndex(p => p.id === assignment.id);
+            let postsUpdated = assignments;
+            assignmentsUpdated.splice(index, 1, assignment);
+            assignments = assignmentsUpdated;
+        } 
+        else {
+            assignments = [assignment, ...assignments];
+        }
+        editingassignment = {
+            id: null,
+            title: "",
+            description: "",
+            deadline: ""
+        };
+    }
 
+    function editAssignment(assignment) {
+        editingAssignment = assignment;
+    }
     async function getRoles(id) {
             await fetch(apiBaseUrl+'/add/?search='+id,{
                 method: "GET",
@@ -83,10 +112,11 @@ import Cookies from 'universal-cookie';
         }
 </script>
 {#if group.createdBy == $userid}
-            hello
+            <AssignmentForm on:postCreated={addAssignment} {editingAssignment}/>
 {/if}
 <h1>{group.createdBy}</h1>
 <h1>{$userid}</h1>
+<h1>{$selectedGroup}</h1>
 <h1>{group.name}</h1>
 <h2>{group.description}</h2>
 
