@@ -3,7 +3,6 @@
     import { server, authtoken, username, email, phone, name } from '../store/stores.js';
     let apiBaseUrl=$server
     import { onMount } from 'svelte';
-    import PostFrom from '../components/PostForm.svelte';
     let loading=false;
     let response=''
     let profile={
@@ -129,8 +128,8 @@
 <style>
 
 </style>
-<button on:click={logOut} class="waves-effect waves-light btn">Logout</button>
-<button on:click={validateToken} class="waves-effect waves-light btn">validate Token</button>
+<button on:click={logOut}>Logout</button>
+<button on:click={validateToken}>validate Token</button>
 <h5>{$authtoken}</h5>
 <h5>{$username}</h5>
 
@@ -138,19 +137,15 @@
     <div class="row">
     <form class="col s12" on:submit={logIn}>
       <div class="row">
-        <div class="input-field col s12">
           <input  bind:value={profile.phone} type="text" class="validate">
           <label for="phone">Phone</label>
-        </div>
       </div>
       <div class="row">
-        <div class="input-field col s12">
           <input  bind:value={profile.password} autocomplete="on" type="password" class="validate">
           <label for="password">Password</label>
-        </div>
       </div>
       <div class="row">
-        <button type="submit" class="waves-effect waves-light btn">
+        <button type="submit">
             login
         </button>
       </div>     
@@ -173,31 +168,23 @@
     <div class="row">
     <form class="col s12" on:submit={signUp}>
       <div class="row">
-        <div class="input-field col s12">
           <input  bind:value={profile.name} type="text" class="validate">
           <label for="name">Name</label>
-        </div>
       </div>
       <div class="row">
-        <div class="input-field col s12">
           <input  bind:value={profile.phone} type="text" class="validate">
           <label for="phone">Phone</label>
-        </div>
       </div>
       <div class="row">
-        <div class="input-field col s12">
           <input bind:value={profile.password} autocomplete="on" type="password" class="validate">
           <label for="password">Password</label>
-        </div>
       </div>
       <div class="row">
-        <div class="input-field col s12">
           <input  bind:value={profile.email} type="email" class="validate">
           <label for="email">Email</label>
-        </div>
       </div>
       <div class="row">
-        <button type="submit" class="waves-effect waves-light btn">
+        <button type="submit">
             Signup
         </button>
       </div>

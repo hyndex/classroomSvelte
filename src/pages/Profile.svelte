@@ -3,7 +3,6 @@
     import { server, authtoken, username, email, phone, name } from '../store/stores.js';
     let apiBaseUrl=$server
     import { onMount } from 'svelte';
-    import PostFrom from '../components/PostForm.svelte';
     let loading=false;
     let response=''
     let profile={

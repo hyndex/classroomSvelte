@@ -4,22 +4,23 @@
     import { server, authtoken, username, email, phone, name } from '../store/stores.js';
     let apiBaseUrl=$server
     const dispatch = createEventDispatcher();
-    export let editingPost;
+    export let addingRole;
 
-    let profile=''
-    let role=''
-    
+    let profile='';
+    let userrole='student';
+
+    $: id=addingRole.id;
     let loading=false;
 
 
     async function onSubmit(event){
+        console.log('profile',profile)
+        console.log('role',userrole)
         event.preventDefault()
-        if(name.trim() === '' || description.trim()===''){
+        if(profile.trim() === '' || userrole.trim() === ''){
             console.log('All data are not present')
             return
         }
-        const newPost = {name , description}
-
         loading=true;
         let url, method;
 
@@ -30,9 +31,9 @@
         const response = await fetch(url,{
             method: method,
             body:JSON.stringify({
-                groupid:editingPost.id,
+                groupid:addingRole.id,
                 username: profile,
-                role: role
+                role: userrole
             }),
             credentials: 'include',
             headers: {
@@ -42,9 +43,11 @@
             }
         });
 
-        const post = await response.json()
+        const role = await response.json()
         loading = false;
-        dispatch('postCreated',post)
+        dispatch('roleCreated',removeEventListener)
+        userrole=''
+        profile=''
     }
 </script>
 <style>
@@ -59,21 +62,14 @@
 
 {#if loading === false}
      <form on:submit={onSubmit}>
-        <div class="input-field">
-            <label for="title">groupid</label>
-            <input type="Text" disabled="disabled" bind:value={editingPost.name}/>
-        </div>
-        <div class="input-field">
-            <label for="body">username/phone</label>
-            <input type="Text" bind:value={profile}/>
-        </div>
-        <select class="custom-select" bind:value={role}>
-            <option value="student">student</option>
-            <option value="teacher">One</option>
-        </select>
-        <button type="submit" class="waves-effect waves-light btn">
-        {editingPost.id ? 'Update' : 'Add'}
-        </button>
+            <input type="Text" disabled="disabled" bind:value={addingRole.name}/>
+            <input type="Text" bind:value={profile} placeholder="username/phone"/>
+            <select bind:value={userrole}>
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+            </select>
+        
+        <button type="submit">Add ROle</button>
 
     </form>
     {:else}

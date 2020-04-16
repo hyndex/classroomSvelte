@@ -4,6 +4,7 @@
     let apiBaseUrl=$server
     import { onMount } from 'svelte';
     import GroupFrom from '../components/GroupForm.svelte';
+    import RoleFrom from '../components/RoleForm.svelte';
     let loading=false;
     let posts=[];
     let roles=[];
@@ -12,7 +13,11 @@
         description:'',
         id:null
     }
-    let postLimit = 10;
+    let addingRole={
+        username:'',
+        role:'',
+        groupid:null
+    }
 
     onMount( async () => {
         // authtoken.set(new Cookies.get('token'));
@@ -30,6 +35,9 @@
 
 function editPost(post){
     editingPost=post;
+}
+function focusRole(role){
+    addingRole=role;
 }
 function clearRoles(){
     console.log('clear')
@@ -78,6 +86,27 @@ function deletePost(id){
     
 }
 
+function deleteRole(id){
+    if(confirm("Are you sure?")){
+        fetch(`${apiBaseUrl}/add/${id}`,{
+            method:'DELETE',
+            credentials: 'include',
+            headers: {
+                "Content-type": "application/json",
+                'Accept': 'application/json',
+                'Authorization': 'Token ' + $authtoken
+            }
+        }).then(async data => {
+            if (data.status < 300) {
+                console.log('success')
+            }
+        }).then(()=>{
+            roles=roles.filter(p => p.id !== id)
+        });
+    }
+    
+}
+
 function addPost({detail: post}){
     if (posts.find(p => p.id === post.id)) {
       const index = posts.findIndex(p => p.id === post.id);
@@ -92,15 +121,20 @@ function addPost({detail: post}){
     }
 }
 
-function setLimit() {
-    fetch(`${apiBaseUrl}/group/${postLimit}`)
-      .then(res => {
-        return res.json();
-      })
-      .then(postsData => {
-        posts = postsData;
-      });
-  }
+function addRole({detail: role}){
+    if (roles.find(p => p.id === role.id)) {
+      const index = roles.findIndex(p => p.id === role.id);
+      let rolesUpdated = roles;
+      rolesUpdated.splice(index, 1, role);
+      roles = rolesUpdated;
+    } else roles = [role, ...roles];
+    addingRole={
+        username:'',
+        role:'',
+        groupid:null
+    }
+}
+
 </script>
 
 <style>
@@ -122,13 +156,11 @@ function setLimit() {
         <button on:click={clearRoles} class="waves-effect waves-light btn">clear</button>
     {/if}
      <div class="row">
-        <div class="col s6">
+        <div class="col s3">
             <GroupFrom on:postCreated={addPost} editingPost={editingPost}/>
         </div>
-        <div class="col s3" style="margin:50px">
-            <p>Limit number of post </p>
-            <input type="number" bind:value={postLimit}/>
-            <button on:click={setLimit} class="waves-effect waves-light btn">Set</button>
+        <div class="col s3">
+            <RoleFrom on:postCreated={addRole} addingRole={addingRole}/>
         </div>
     </div>
 
@@ -149,6 +181,7 @@ function setLimit() {
                             <a href="#" on:click={() => editPost(post)}>Edit</a>
                             <a href="#" class="delete-btn" on:click={() => deletePost(post.id)}>Delete</a>
                             <a href="#" on:click={() => getRoles(post.id)}>Roles</a>
+                            <a href="#" on:click={() => focusRole(post)}>Add Roles</a>
                         </div>
                     </div>
                 </div>
@@ -170,7 +203,7 @@ function setLimit() {
                             <p class="body">{role.role}</p>
                         </div>
                         <div class="card-action">
-                            <!-- <a href="#" class="delete-btn">Delete</a> -->
+                            <a href="#" on:click={() => deleteRole(role.id)} class="delete-btn">Delete</a>
                         </div>
                     </div>
                 </div>

@@ -66,15 +66,11 @@
 
 {#if loading === false}
      <form on:submit={onSubmit}>
-        <div class="input-field">
             <label for="title">Title</label>
             <input type="Text" bind:value={editingPost.name}/>
-        </div>
-        <div class="input-field">
             <label for="body">Body</label>
             <input type="Text" bind:value={editingPost.description}/>
-        </div>
-        <button type="submit" class="waves-effect waves-light btn">
+        <button type="submit">
         {editingPost.id ? 'Update' : 'Add'}
         </button>
 

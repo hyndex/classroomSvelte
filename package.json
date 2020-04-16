@@ -19,7 +19,6 @@
   "dependencies": {
     "bootstrap": "^4.4.1",
     "jquery": "^3.5.0",
-    "materialize-css": "^1.0.0-rc.2",
     "sirv-cli": "^0.4.4",
     "svelte-routing": "^1.4.2",
     "universal-cookie": "^4.0.3"
