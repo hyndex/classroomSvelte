@@ -17,7 +17,7 @@
     
     async function validateToken(){
         authtoken.set(new Cookies().get('token'));
-        fetch('http://localhost:8000/users/profile/', {
+        fetch($server+'/users/profile/', {
             method: 'GET',
             credentials: 'include',
             headers: {
@@ -46,7 +46,7 @@
     }
     async function signUp(event) {
         event.preventDefault()
-        await fetch(apiBaseUrl+'/profile/',{
+        await fetch($server+'/profile/',{
             method: "POST",
             credentials: "include",
             headers: {
