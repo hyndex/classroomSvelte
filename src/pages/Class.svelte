@@ -183,11 +183,15 @@
       if (data.status < 300) {
         let temp = await data.json();
         submitStore.set(temp)
+        return temp
       } else {
         let temp = await data.json();
+        return false
       }
     });
   }
+
+ 
 </script>
 
 
@@ -222,19 +226,15 @@
   <br />
   attachment: {assignment.file ? assignment.file : 'No file attached'}
   <br />
+  {console.log(assignment)}
   {#if group.createdBy == $userid}
-  <button on:click={() => editAssignment(assignment)}>Edit</button>
-  <br />
-  <button on:click={() => getSubmits(assignment.id)}>Show submits</button>
-  <br />
-  <button class="delete-btn" on:click={() => deleteAssignment(assignment.id)}>
-    Delete
-  </button>
-  <br>
+    <button on:click={() => editAssignment(assignment)}>Edit</button>
+    <button on:click={() => getSubmits(assignment.id)}>Show submits</button>
+    <button class="delete-btn" on:click={() => deleteAssignment(assignment.id)}>Delete</button>
   {:else}
-  <button on:click={() => selectedAssignment.set(assignment)}>Submit Answer</button>
-  <button on:click={() => getSubmits(assignment.id)}>Show submits</button>
-{/if} 
+    <button on:click={() => selectedAssignment.set(assignment)}>Submit Answer</button>
+    <button on:click={() => getSubmits(assignment.id)}>Show submits</button>
+  {/if} 
   <br />
   <hr />
 {/each}
@@ -253,16 +253,12 @@
   <br />
   attachment: {submit.file ? submit.file : 'No file attached'}
   <br />
-  {#if group.createdBy != $userid}
-  <button on:click={() => editNote(submit)}>Edit</button>
-  {/if}
   <br />
   <br />
   <hr />
 {/each}
 
  <!-- ASSIGNMENT SUBMIT SECTION  END -->
-
 
  <!-- NOTES SECTION  START -->
 
