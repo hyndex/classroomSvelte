@@ -9,10 +9,13 @@
     name,
     userid,
     selectedGroup,
+    selectedAssignment,
+    selectedNote,
     groupStore,
     assignmentStore,
     noteStore,
-    roleStore
+    roleStore,
+    submitStore
   } from "../store/stores.js";
   import Class from "./Class.svelte";
   import { Link, Route } from "svelte-routing";
@@ -209,18 +212,15 @@
               <p class="body">{group.description}</p>
             </div>
             <div class="card-action">
-              <a href="#" on:click={() => editGroup(group)}>Edit</a>
-              <Link to="/class" on:click={() => selectedGroup.set(group.id)}>
-                Enter
-              </Link>
-              <a
-                href="#"
-                class="delete-btn"
-                on:click={() => deleteGroup(group.id)}>
-                Delete
-              </a>
-              <a href="#" on:click={() => getRoles(group.id)}>Roles</a>
-              <a href="#" on:click={() => focusRole(group)}>Add Roles</a>
+            {#if group.createdBy == $userid}
+              <button on:click={() => editGroup(group)}>Edit</button>
+              <button class="delete-btn" on:click={() => deleteGroup(group.id)}> Delete </button>
+              <button on:click={() => getRoles(group.id)}>Roles</button>
+              <button on:click={() => focusRole(group)}>Add Roles</button>
+            {/if}
+                          
+            <button><Link to="/class" on:click={() => selectedGroup.set(group.id)}>Enter</Link></button>
+              
             </div>
           </div>
         </div>

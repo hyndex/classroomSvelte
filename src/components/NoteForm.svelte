@@ -10,10 +10,13 @@
     name,
     userid,
     selectedGroup,
+    selectedAssignment,
+    selectedNote,
     groupStore,
     assignmentStore,
     noteStore,
-    roleStore
+    roleStore,
+    submitStore
   } from "../store/stores.js";
   let apiBaseUrl = $server;
   const dispatch = createEventDispatcher();

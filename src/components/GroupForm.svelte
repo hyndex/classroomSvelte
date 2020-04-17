@@ -7,7 +7,16 @@
     username,
     email,
     phone,
-    name
+    name,
+    userid,
+    selectedGroup,
+    selectedAssignment,
+    selectedNote,
+    groupStore,
+    assignmentStore,
+    noteStore,
+    roleStore,
+    submitStore
   } from "../store/stores.js";
   let apiBaseUrl = $server;
   const dispatch = createEventDispatcher();
