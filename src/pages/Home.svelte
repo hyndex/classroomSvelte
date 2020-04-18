@@ -15,7 +15,9 @@
     assignmentStore,
     noteStore,
     roleStore,
-    submitStore
+    submitStore,
+    loadingstore,
+    validate,
   } from "../store/stores.js";
   import Class from "./Class.svelte";
   import { Link, Route } from "svelte-routing";
@@ -23,7 +25,6 @@
   import { onMount } from "svelte";
   import GroupFrom from "../components/GroupForm.svelte";
   import RoleFrom from "../components/RoleForm.svelte";
-  let loading = false;
   let groups = [];
   let roles = [];
   let editingGroup = {
@@ -43,6 +44,7 @@
   onMount(async () => {
     selectedGroup.set(false);
     // authtoken.set(new Cookies.get('token'));
+    loadingstore.set(true)
     const res = await fetch(apiBaseUrl + "/group/", {
       method: "GET",
       credentials: "include",
@@ -52,6 +54,7 @@
         Authorization: "Token " + $authtoken
       }
     });
+    loadingstore.set(false)
     groups = await res.json();
     groupStore.set(groups);
   });
@@ -69,6 +72,7 @@
   }
 
   async function getRoles(id) {
+    loadingstore.set(true)
     await fetch(apiBaseUrl + "/add/?search=" + id, {
       method: "GET",
       credentials: "include",
@@ -87,10 +91,12 @@
         console.log(response);
       }
     });
+    loadingstore.set(false)
   }
 
   function deleteGroup(id) {
     if (confirm("Are you sure?")) {
+      loadingstore.set(true)
       fetch(`${apiBaseUrl}/group/${id}`, {
         method: "DELETE",
         credentials: "include",
@@ -110,11 +116,13 @@
           groups = groups.filter(p => p.id !== id);
           groupStore.set(groups);
         });
+      loadingstore.set(false)
     }
   }
 
   function deleteRole(id) {
     if (confirm("Are you sure?")) {
+      loadingstore.set(true)
       fetch(`${apiBaseUrl}/add/${id}`, {
         method: "DELETE",
         credentials: "include",
@@ -134,6 +142,7 @@
           roles = roles.filter(p => p.id !== id);
           roleStore.set(roles);
         });
+        loadingstore.set(false)
     }
   }
 
@@ -174,21 +183,22 @@
   function gotoGroup(id) {
     selectedGroup.set(id);
   }
+
+  
 </script>
 
 <style>
 
 </style>
 
-{console.log('store', $roleStore)}
 {#if $authtoken != false}
   {#if $selectedGroup != false}
     <Route path="/" component={Class} />
   {/if}
   {#if roles.length != 0}
-    <button on:click={clearRoles} class="waves-effect waves-light btn">
+    <!-- <button on:click={clearRoles} class="waves-effect waves-light btn">
       clear
-    </button>
+    </button> -->
   {/if}
   <div class="row">
     <div class="col s3">
@@ -199,58 +209,78 @@
     </div>
   </div>
 
+<button type="button" class="btn btn-primary my-5" data-toggle="modal" data-target="#groupModal">
+    Create New Group
+</button>
+
+
+  <!-- groups section started-->
+
   <div class="row">
     {#if $groupStore.length === 0}
-      <h1>loading groups ...</h1>
+      <h1>loadingstore groups ...</h1>
     {:else}
       {#each $groupStore as group}
-        <div class="col s6">
-          <div class="card">
-            <div class="card-content">
-              <p class="card-title">{group.name}</p>
-              <p class="timestamp">{group.date_updated}</p>
-              <p class="body">{group.description}</p>
-            </div>
-            <div class="card-action">
+        <div class="card bg-light mb-3 mx-3 my-2" style="width: 25rem;">
+          <div class="card-header">{group.name}</div>
+          <div class="card-body">
+            <h5 class="card-title">{group.description}</h5>
+            <p class="card-text">{group.date_updated}</p>
+          </div>
+          <div class="row align-middle">
             {#if group.createdBy == $userid}
-              <button on:click={() => editGroup(group)}>Edit</button>
-              <button class="delete-btn" on:click={() => deleteGroup(group.id)}> Delete </button>
-              <button on:click={() => getRoles(group.id)}>Roles</button>
-              <button on:click={() => focusRole(group)}>Add Roles</button>
+                <button class="btn btn-outline-danger ml-1 btn-xs" data-toggle="modal" data-target="#groupModal" on:click={() => editGroup(group)}>Edit</button>
+                <button class="btn btn-outline-danger ml-1 btn-xs" on:click={() => deleteGroup(group.id)}> Delete </button>
+                <button class="btn btn-outline-secondary ml-1 btn-xs" data-toggle="modal" data-target="#roleListModal" on:click={() => getRoles(group.id)}>Roles</button>
+                <button class="btn btn-outline-success ml-1 btn-xs" data-toggle="modal" data-target="#roleModal" on:click={() => focusRole(group)}>Add Roles</button>
             {/if}
-                          
-            <button><Link to="/class" on:click={() => selectedGroup.set(group.id)}>Enter</Link></button>
-              
-            </div>
+            <Link to="/class" on:click={() => selectedGroup.set(group.id)}><button class="btn ml-1 btn-outline-primary btn-xs" >Enter</button></Link>
           </div>
         </div>
       {/each}
     {/if}
   </div>
 
-  <div class="row">
-    {#if $roleStore.length === 0}
-      <h1>No group selected ...</h1>
-    {:else}
-      {#each $roleStore as role}
-        <div class="col s6">
-          <div class="card">
-            <div class="card-content">
-              <p class="card-title">{role.profile.name}</p>
-              <p class="body">{role.profile.user.username}</p>
-              <p class="body">{role.role}</p>
-            </div>
-            <div class="card-action">
-              <a
-                href="#"
-                on:click={() => deleteRole(role.id)}
-                class="delete-btn">
-                Delete
-              </a>
-            </div>
-          </div>
+
+
+  <!-- groups section ended-->
+
+  <!-- Roles modal start-->
+
+  <!-- Modal -->
+  <div class="modal fade" id="roleListModal" tabindex="-1" role="dialog" aria-labelledby="roleListModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="roleListModaTitle">Members </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
-      {/each}
-    {/if}
+        <div class="modal-body">
+          .{#if $roleStore.length === 0}
+              <h1>No Members Found ...</h1>
+            {:else}
+            <ul class="list-group">
+              {#each $roleStore as role}
+                <li class="list-group-item d-flex justify-content-between align-items-center" data-toggle="popover" title={role.profile.user.username} >
+                  {role.profile.name}   {role.role}  
+                  <button class="badge badge-danger badge-pill mx-1" on:click={() => deleteRole(role.id)}>x</button>
+                </li>
+              {/each}
+              </ul>
+            {/if}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
+
+
+  <!-- Roles modal end-->
+
+
 {/if}
+

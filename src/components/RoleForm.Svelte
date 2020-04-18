@@ -16,7 +16,8 @@
     assignmentStore,
     noteStore,
     roleStore,
-    submitStore
+    submitStore,
+    loadingstore,
   } from "../store/stores.js";
   let apiBaseUrl = $server;
   const dispatch = createEventDispatcher();
@@ -29,8 +30,7 @@
   let loading = false;
 
   async function onSubmit(event) {
-    console.log("profile", profile);
-    console.log("role", userrole);
+    loadingstore.set(true)
     event.preventDefault();
     if (profile.trim() === "" || userrole.trim() === "") {
       console.log("All data are not present");
@@ -67,35 +67,43 @@
     });
 
     loading = false;
+    loadingstore.set(false)
     dispatch("roleCreated", removeEventListener);
     profile = "";
   }
 </script>
 
 <style>
-  form {
-    margin: 50px;
-  }
 
-  .progress {
-    margin: 100px, 0;
-  }
 </style>
 
-{#if loading === false}
-  <form on:submit={onSubmit}>
-    <input type="Text" disabled="disabled" bind:value={addingRole.name} />
-    <input type="Text" bind:value={profile} placeholder="username/phone" />
-    <select bind:value={userrole}>
-      <option value="student">Student</option>
-      <option value="teacher">Teacher</option>
-    </select>
-
-    <button type="submit">Add ROle</button>
-
-  </form>
-{:else}
-  <div class="progress">
-    <div class="indeterminate" />
+<!-- role Modal -->
+<div class="modal fade" id="roleModal" tabindex="-1" role="dialog" aria-labelledby="roleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="roleModalLabel">new member</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Form started -->
+        <form on:submit={onSubmit}>
+          <div class="form-group">
+            <label for="roleModalPhone1">Name</label>
+            <input type="text" disabled="disabled" bind:value={addingRole.name} class="form-control"  aria-describedby="group">
+          </div>
+          <div class="form-group">
+            <label for="roleModalPassword1">Description</label>
+            <input type="test" bind:value={profile} placeholder="username/phone" class="form-control" >
+          </div>
+          <button type="submit" class="btn btn-primary">ADD</button>
+        </form>
+        <!-- Form ended -->
+      </div>
+      
+    </div>
   </div>
-{/if}
+</div>
+<!-- role Modal ended-->

@@ -16,7 +16,9 @@
     assignmentStore,
     noteStore,
     roleStore,
-    submitStore
+    submitStore,
+    loadingstore,
+    selectedSubmit
   } from "../store/stores.js";
   let apiBaseUrl = $server;
   const dispatch = createEventDispatcher();
@@ -30,6 +32,7 @@
 
   async function onSubmitAssignment(event) {
     event.preventDefault();
+    loadingstore.set(true)
     if (
       title.trim() === "" ||
       description.trim() === "" 
@@ -74,6 +77,7 @@
       }
     });
     loading = false;
+    loadingstore.set(false)
   }
 </script>
 

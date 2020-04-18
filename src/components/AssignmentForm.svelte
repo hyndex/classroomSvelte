@@ -16,7 +16,8 @@
     assignmentStore,
     noteStore,
     roleStore,
-    submitStore
+    submitStore,
+    loadingstore
   } from "../store/stores.js";
   let apiBaseUrl = $server;
   const dispatch = createEventDispatcher();
@@ -31,6 +32,7 @@
 
   async function onSubmitAssignment(event) {
     event.preventDefault();
+    loadingstore.set(true)
     console.log("title", title);
     console.log("description", description);
     console.log("deadline", deadline);
@@ -74,50 +76,66 @@
           let assignmentsUpdated = $assignmentStore;
           assignmentsUpdated.splice(index, 1, assignment);
           assignmentStore.set(assignmentsUpdated);
-        } else assignmentStore.set([assignment, ...$assignmentStore]);
-      } else {
+        } 
+        else{
+          assignmentStore.set([assignment, ...$assignmentStore]);
+        }
+        
+      } 
+      else {
         let assignment = await data.json();
       }
     });
     loading = false;
+    loadingstore.set(false)
+    editingAssignment = {
+      id: null,
+      title: "",
+      description: "",
+      deadline: ""
+    };
   }
 </script>
 
 <style>
-  form {
-    margin: 50px;
-  }
 
-  .progress {
-    margin: 100px, 0;
-  }
 </style>
 
-{console.log(editingAssignment)}
-{#if loading === false}
-  <form on:submit={onSubmitAssignment}>
-    <input
-      type="Text"
-      bind:value={editingAssignment.title}
-      placeholder="Title" />
-    <input
-      type="Text"
-      bind:value={editingAssignment.description}
-      placeholder="Description" />
-    <input
-      type="Text"
-      bind:value={editingAssignment.deadline}
-      placeholder="Deadline yyyymmdd" />
-    <input type="file" bind:files />
-    <button type="submit">
-      <button type="submit">
-        {editingAssignment.id ? 'Update Assignment' : 'Add Assignment'}
-      </button>
-    </button>
-
-  </form>
-{:else}
-  <div class="progress">
-    <div class="indeterminate" />
+<!-- group Modal -->
+<div class="modal fade" id="assignmentModal" tabindex="-1" role="dialog" aria-labelledby="noteModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="noteModalLabel">Note</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Form started -->
+        <form on:submit={onSubmitAssignment}>
+          <div class="form-group">
+            <input type="text" placeholder="Title" bind:value={editingAssignment.title} class="form-control"  aria-describedby="name">
+          </div>
+          <div class="form-group">
+            <input type="test" placeholder="Description" bind:value={editingAssignment.description} class="form-control" >
+          </div>
+          <div class="form-group">
+            <input type="test" placeholder="deadline yyyymmdd" bind:value={editingAssignment.deadline} class="form-control" >
+          </div>
+          <div class="form-group">
+            <div class="custom-file">
+              <label class="custom-file-label" for="customFile">Choose file</label>
+              <input type="file"  bind:files class="custom-file-input" id="customFile">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary my-1">{editingAssignment.id ? 'Update' : 'Create'}</button>
+        </form>
+        <!-- Form ended -->
+      </div>
+      
+    </div>
   </div>
-{/if}
+</div>
+<!-- group Modal ended-->
+

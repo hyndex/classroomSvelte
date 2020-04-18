@@ -15,11 +15,12 @@
     assignmentStore,
     noteStore,
     roleStore,
-    submitStore
+    submitStore,
+    loadingstore,
+    validate,
   } from "../store/stores.js";
   let apiBaseUrl = $server;
   import { onMount } from "svelte";
-  let loading = false;
   let response = "";
   let profile = {
     username: "",
@@ -32,6 +33,7 @@
   let token = false;
   onMount(async () => {
     authtoken.set(new Cookies().get("token"));
+    loadingstore.set(true)
     fetch("http://localhost:8000/users/profile/", {
       method: "GET",
       credentials: "include",
@@ -60,9 +62,11 @@
         name.set(false);
       }
     });
+    loadingstore.set(false)
   });
   async function validateToken() {
     authtoken.set(new Cookies().get("token"));
+    loadingstore.set(true)
     fetch("http://localhost:8000/users/profile/", {
       method: "GET",
       credentials: "include",
@@ -87,9 +91,11 @@
         name.set(false);
       }
     });
+    loadingstore.set(false)
   }
   async function updateProfile(event) {
     event.preventDefault();
+    loadingstore.set(true)
     await fetch(apiBaseUrl + "/profile/", {
       method: "PUT",
       credentials: "include",
@@ -116,6 +122,7 @@
         console.log(response);
       }
     });
+    loadingstore.set(false)
   }
 </script>
 
@@ -123,12 +130,12 @@
 
 </style>
 
-<button on:click={validateToken} class="waves-effect waves-light btn">
+<!-- <button on:click={validateToken} class="waves-effect waves-light btn">
   validate Token
 </button>
 <h5>{$authtoken}</h5>
-<h5>{$username}</h5>
-
+<h5>{$username}</h5> -->
+<!-- 
 <div class="row">
   <div class="row">
     <form class="col s12" on:submit={updateProfile}>
@@ -158,4 +165,42 @@
 
     </form>
   </div>
+</div> -->
+
+
+<!-- log In Modal -->
+<div class="modal fade" id="ProfileModal" tabindex="-1" role="dialog" aria-labelledby="ProfileModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">log In Up</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Form started -->
+        <form on:submit={updateProfile}>
+          <div class="form-group">
+            <label for="ProfileModalPhone1">Phone Number</label>
+            <input type="text" bind:value={profile.phone} class="form-control"  aria-describedby="phoneHelp">
+          </div>
+          <div class="form-group">
+            <label for="ProfileModalPhone1">Email </label>
+            <input type="text" bind:value={profile.email} class="form-control"  aria-describedby="phoneHelp">
+          </div>
+          <div class="form-group">
+            <label for="ProfileModalPhone1">Full Name</label>
+            <input type="text" bind:value={profile.name} class="form-control"  aria-describedby="phoneHelp">
+          </div>
+
+          <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+        <!-- Form ended -->
+      </div>
+      
+    </div>
+  </div>
 </div>
+
+<!-- log In Modal ended-->

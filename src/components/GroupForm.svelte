@@ -16,7 +16,8 @@
     assignmentStore,
     noteStore,
     roleStore,
-    submitStore
+    submitStore,
+    loadingstore
   } from "../store/stores.js";
   let apiBaseUrl = $server;
   const dispatch = createEventDispatcher();
@@ -30,6 +31,7 @@
 
   async function onSubmit(event) {
     event.preventDefault();
+    loadingstore.set(true)
     if (title.trim() === "" || body.trim() === "") {
       console.log("All data are not present");
       return;
@@ -48,8 +50,8 @@
     }
     console.log(
       JSON.stringify({
-        name: title,
-        description: body
+        name: editingGroup.title,
+        description: editingGroup.description
       })
     );
     const response = await fetch(url, {
@@ -69,39 +71,44 @@
 
     const group = await response.json();
     loading = false;
+    loadingstore.set(false)
     dispatch("groupCreated", group);
   }
 </script>
 
 <style>
-  form {
-    margin: 50px;
-  }
 
-  .progress {
-    margin: 100px, 0;
-  }
+
+
 </style>
 
-{#if loading === false}
-  <form on:submit={onSubmit}>
-    <div class="input-field">
-      <input type="Text" placeholder="Name" bind:value={editingGroup.name} />
+<!-- group Modal -->
+<div class="modal fade" id="groupModal" tabindex="-1" role="dialog" aria-labelledby="groupModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="groupModalLabel">New group</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Form started -->
+        <form on:submit={onSubmit}>
+          <div class="form-group">
+            <label for="groupModalPhone1">Name</label>
+            <input type="text" bind:value={editingGroup.name} class="form-control"  aria-describedby="name">
+          </div>
+          <div class="form-group">
+            <label for="groupModalPassword1">Description</label>
+            <input type="test" bind:value={editingGroup.description} class="form-control" >
+          </div>
+          <button type="submit" class="btn btn-primary">{editingGroup.id ? 'Update' : 'Create'}</button>
+        </form>
+        <!-- Form ended -->
+      </div>
+      
     </div>
-    <div class="input-field">
-      <input
-        type="Text"
-        placeholder="description"
-        bind:value={editingGroup.description} />
-    </div>
-    <input type="file" bind:files />
-    <button type="submit">
-      {editingGroup.id ? 'Update' : 'Add'}
-    </button>
-
-  </form>
-{:else}
-  <div class="progress">
-    <div class="indeterminate" />
   </div>
-{/if}
+</div>
+<!-- group Modal ended-->

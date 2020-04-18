@@ -15,14 +15,17 @@
     assignmentStore,
     noteStore,
     roleStore,
-    submitStore
+    submitStore,
+    loadingstore,
+    validate,
+    selectedSubmit,
   } from "../store/stores.js";
   import NoteForm from "../components/NoteForm.svelte";
   import AssignmentForm from "../components/AssignmentForm.svelte";
   import SubmitForm from "../components/SubmitForm.svelte";
+
   let apiBaseUrl = $server;
   import { onMount } from "svelte";
-  let loading = false;
   let response = "";
   let group = "";
   let owner = false;
@@ -33,20 +36,23 @@
     description: "",
     deadline: ""
   };
+  
   let notes = [];
   let editingNote = {
     id: null,
     title: "",
     description: ""
   };
+  
   let submits = [];
   let editingSubmit = {
     id: null,
     title: "",
     description: ""
   };
-
+  
   onMount(async () => {
+    loadingstore.set(true)
     fetch($server + "/users/group/" + $selectedGroup + "/", {
       method: "GET",
       credentials: "include",
@@ -92,6 +98,7 @@
         noteStore.set(notes);
       }
     });
+    loadingstore.set(false)
   });
 
   function editAssignment(assignment) {
@@ -103,9 +110,33 @@
   function editSubmit(submit) {
     editingSubmit = submit;
   }
+  function addSubmit(){
+    editingSubmit = {
+      id: null,
+      title: "",
+      description: ""
+    };
+  }
+function addNote(){
+    editingNote = {
+      id: null,
+      title: "",
+      description: ""
+    };
+  }
+  function addAssignment(){
+    editingAssignment = {
+      id: null,
+      title: "",
+      description: "",
+      deadline: ""
+    };
+  }
+
 
   function deleteAssignment(id) {
     if (confirm("Are you sure?")) {
+      loadingstore.set(true)
       fetch(`${apiBaseUrl}/class/assignment/${id}`, {
         method: "DELETE",
         credentials: "include",
@@ -125,10 +156,12 @@
           assignments = assignments.filter(p => p.id !== id);
           assignmentStore.set(assignments);
         });
+        loadingstore.set(false)
     }
   }
   function deleteNote(id) {
     if (confirm("Are you sure?")) {
+      loadingstore.set(true)
       fetch(`${apiBaseUrl}/class/notes/${id}`, {
         method: "DELETE",
         credentials: "include",
@@ -148,10 +181,12 @@
           notes = notes.filter(p => p.id !== id);
           noteStore.set(notes);
         });
+      loadingstore.set(false)
     }
   }
 
   async function getRoles(id) {
+    loadingstore.set(true)
     await fetch(apiBaseUrl + "/add/?search=" + id, {
       method: "GET",
       credentials: "include",
@@ -169,8 +204,10 @@
         console.log('error',response);
       }
     });
+    loadingstore.set(false)
   }
   async function getSubmits(id) {
+    loadingstore.set(true)
     await fetch(apiBaseUrl + "/class/submit/?assignment__id=" + id, {
       method: "GET",
       credentials: "include",
@@ -189,12 +226,35 @@
         return false
       }
     });
+    loadingstore.set(false)
   }
+
 
  
 </script>
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<button type="button" on:click={() => addAssignment()} onclass="btn btn-primary" data-toggle="modal" data-target="#noteModal">
+      Give New Note
+</button>
+<button type="button" on:click={() => addNote()} class="btn btn-primary" data-toggle="modal" data-target="#assignmentModal">
+      Give New Assignment
+</button>
  <!-- FORM SECTION  START-->
 
 
@@ -228,7 +288,7 @@
   <br />
   {console.log(assignment)}
   {#if group.createdBy == $userid}
-    <button on:click={() => editAssignment(assignment)}>Edit</button>
+    <button on:click={() => editAssignment(assignment)} type="button" class="btn btn-primary" data-toggle="modal" data-target="#assignmentModal">Edit</button>
     <button on:click={() => getSubmits(assignment.id)}>Show submits</button>
     <button class="delete-btn" on:click={() => deleteAssignment(assignment.id)}>Delete</button>
   {:else}

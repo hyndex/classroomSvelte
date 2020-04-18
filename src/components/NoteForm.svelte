@@ -16,7 +16,8 @@
     assignmentStore,
     noteStore,
     roleStore,
-    submitStore
+    submitStore,
+    loadingstore,
   } from "../store/stores.js";
   let apiBaseUrl = $server;
   const dispatch = createEventDispatcher();
@@ -30,6 +31,7 @@
 
   async function onSubmit(event) {
     event.preventDefault();
+    loadingstore.set(true)
     if (title.trim() === "" || description.trim() === "") {
       console.log("All data are not present");
       return;
@@ -70,33 +72,53 @@
         let note = await data.json();
       }
     });
+    editingNote = {
+      id: null,
+      title: "",
+      description: ""
+    };
     loading = false;
+    loadingstore.set(false)
   }
 </script>
 
 <style>
-  form {
-    margin: 50px;
-  }
 
-  .progress {
-    margin: 100px, 0;
-  }
 </style>
 
-{#if loading === false}
-  <form on:submit={onSubmit}>
-    <input type="Text" bind:value={editingNote.title} placeholder="Title" />
-    <input
-      type="Text"
-      bind:value={editingNote.description}
-      placeholder="Description" />
-    <input type="file" bind:files />
-    <button type="submit">{editingNote.id ? 'Update Note' : 'Add Note'}</button>
 
-  </form>
-{:else}
-  <div class="progress">
-    <div class="indeterminate" />
+<!-- note Modal -->
+<div class="modal fade" id="noteModal" tabindex="-1" role="dialog" aria-labelledby="noteModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="noteModalLabel">Note</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Form started -->
+        <form on:submit={onSubmit}>
+          <div class="form-group">
+            <input type="text" bind:value={editingNote.title} class="form-control"  aria-describedby="name">
+          </div>
+          <div class="form-group">
+            <input type="test" bind:value={editingNote.description} class="form-control" >
+          </div>
+          <div class="form-group">
+            <div class="custom-file my-1">
+              <label class="custom-file-label" for="customFile">Choose file</label>
+              <input type="file"  bind:files class="custom-file-input" id="customFile">
+            </div>
+          </div>
+          
+          <button type="submit" class="btn btn-primary">{editingNote.id ? 'Update' : 'Create'}</button>
+        </form>
+        <!-- Form ended -->
+      </div>
+      
+    </div>
   </div>
-{/if}
+</div>
+<!-- group Modal ended-->
