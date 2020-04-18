@@ -4,21 +4,24 @@
   import {
     server,
     authtoken,
+    validate,
     username,
+    userid,
+    name,
     email,
     phone,
-    name,
-    userid,
+    status,
+    isGroupOwner,
     selectedGroup,
     selectedAssignment,
     selectedNote,
+    selectedSubmit,
     groupStore,
     assignmentStore,
     noteStore,
     roleStore,
     submitStore,
-    loadingstore,
-    selectedSubmit
+    loadingstore
   } from "../store/stores.js";
   let apiBaseUrl = $server;
   const dispatch = createEventDispatcher();
@@ -84,31 +87,42 @@
 <style>
 </style>
 
-{#if loading === false}
-  <form on:submit={onSubmitAssignment}>
-    <input
-      type="Text"
-      disabled
-      bind:value={$selectedAssignment.title}
-      placeholder="Assignment" />
-    <input
-      type="Text"
-      bind:value={editingSubmit.title}
-      placeholder="title" />
-    <input
-      type="Text"
-      bind:value={editingSubmit.description}
-      placeholder="Description" />
-    <input type="file" bind:files />
-    <button type="submit">
-      <button type="submit">
-        {editingSubmit.id ? 'Update Assignment' : 'Submit Assignment'}
-      </button>
-    </button>
-
-  </form>
-{:else}
-  <div class="progress">
-    <div class="indeterminate" />
+<!-- note Modal -->
+<div class="modal fade" id="submitModal" tabindex="-1" role="dialog" aria-labelledby="submitModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="submitModalLabel">Assignment Submit</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Form started -->
+        <form on:submit={onSubmitAssignment}>
+          <div class="form-group">
+            <input type="text" disabled bind:value={$selectedAssignment.title} class="form-control"  aria-describedby="name">
+          </div>
+          <div class="form-group">
+            <input type="text" bind:value={editingSubmit.title} class="form-control"  aria-describedby="name">
+          </div>
+          <div class="form-group">
+            <input type="test" bind:value={editingSubmit.description} class="form-control" >
+          </div>
+          <div class="form-group">
+            <div class="custom-file my-1">
+              <label class="custom-file-label" for="customFile">Choose file</label>
+              <input type="file"  bind:files class="custom-file-input" id="customFile">
+            </div>
+          </div>
+          
+          <button type="submit" class="btn btn-primary">{editingSubmit.id ? 'Update' : 'Create'}</button>
+        </form>
+        <!-- Form ended -->
+      </div>
+      
+    </div>
   </div>
-{/if}
+</div>
+<!-- group Modal ended-->
+

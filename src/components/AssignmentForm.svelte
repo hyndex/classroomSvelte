@@ -4,14 +4,18 @@
   import {
     server,
     authtoken,
+    validate,
     username,
+    userid,
+    name,
     email,
     phone,
-    name,
-    userid,
+    status,
+    isGroupOwner,
     selectedGroup,
     selectedAssignment,
     selectedNote,
+    selectedSubmit,
     groupStore,
     assignmentStore,
     noteStore,
@@ -106,7 +110,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="noteModalLabel">Note</h5>
+        <h5 class="modal-title" id="noteModalLabel">Assignment Form</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>

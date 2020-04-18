@@ -3,21 +3,24 @@
   import {
     server,
     authtoken,
+    validate,
     username,
+    userid,
+    name,
     email,
     phone,
-    name,
-    userid,
+    status,
+    isGroupOwner,
     selectedGroup,
     selectedAssignment,
     selectedNote,
+    selectedSubmit,
     groupStore,
     assignmentStore,
     noteStore,
     roleStore,
     submitStore,
-    loadingstore,
-    validate,
+    loadingstore
   } from "../store/stores.js";
   import Class from "./Class.svelte";
   import { Link, Route } from "svelte-routing";
@@ -229,12 +232,12 @@
           </div>
           <div class="row align-middle">
             {#if group.createdBy == $userid}
-                <button class="btn btn-outline-danger ml-1 btn-xs" data-toggle="modal" data-target="#groupModal" on:click={() => editGroup(group)}>Edit</button>
-                <button class="btn btn-outline-danger ml-1 btn-xs" on:click={() => deleteGroup(group.id)}> Delete </button>
-                <button class="btn btn-outline-secondary ml-1 btn-xs" data-toggle="modal" data-target="#roleListModal" on:click={() => getRoles(group.id)}>Roles</button>
-                <button class="btn btn-outline-success ml-1 btn-xs" data-toggle="modal" data-target="#roleModal" on:click={() => focusRole(group)}>Add Roles</button>
+                <button class="btn btn-outline-danger ml-1 btn-xs ml-4 my-2" data-toggle="modal" data-target="#groupModal" on:click={() => editGroup(group)}>Edit</button>
+                <button class="btn btn-outline-danger ml-1 btn-xs my-2" on:click={() => deleteGroup(group.id)}> Delete </button>
+                <button class="btn btn-outline-secondary ml-1 btn-xs my-2" data-toggle="modal" data-target="#roleListModal" on:click={() => getRoles(group.id)}>Roles</button>
+                <button class="btn btn-outline-success ml-1 btn-xs my-2" data-toggle="modal" data-target="#roleModal" on:click={() => focusRole(group)}>Add Roles</button>
             {/if}
-            <Link to="/class" on:click={() => selectedGroup.set(group.id)}><button class="btn ml-1 btn-outline-primary btn-xs" >Enter</button></Link>
+            <Link to="/class" on:click={() => selectedGroup.set(group.id)}><button class="btn ml-4 my-2 btn-outline-primary btn-xs" >Enter</button></Link>
           </div>
         </div>
       {/each}

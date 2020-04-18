@@ -3,22 +3,24 @@
   import {
     server,
     authtoken,
+    validate,
     username,
+    userid,
+    name,
     email,
     phone,
-    name,
-    userid,
+    status,
+    isGroupOwner,
     selectedGroup,
     selectedAssignment,
     selectedNote,
+    selectedSubmit,
     groupStore,
     assignmentStore,
     noteStore,
     roleStore,
     submitStore,
-    loadingstore,
-    validate,
-    selectedSubmit,
+    loadingstore
   } from "../store/stores.js";
   import NoteForm from "../components/NoteForm.svelte";
   import AssignmentForm from "../components/AssignmentForm.svelte";
@@ -30,6 +32,8 @@
   let group = "";
   let owner = false;
   let assignments = [];
+  let AssignmentTab="nav-link active";
+  let NotesTab="nav-link";
   let editingAssignment = {
     id: null,
     title: "",
@@ -100,6 +104,48 @@
     });
     loadingstore.set(false)
   });
+
+
+function getAllAssignments(){
+  loadingstore.set(true)
+  fetch($server + "/class/assignment/?group__id=" + $selectedGroup, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-type": "application/json",
+        Accept: "application/json",
+        Authorization: "Token " + $authtoken
+      }
+    }).then(async data => {
+      if (data.status < 300) {
+        assignments = await data.json();
+        assignmentStore.set(assignments);
+      }
+    });
+    loadingstore.set(false)
+}
+
+function getAllNotes(){
+  loadingstore.set(true)
+  fetch($server + "/class/notes/?group__id=" + $selectedGroup, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-type": "application/json",
+        Accept: "application/json",
+        Authorization: "Token " + $authtoken
+      }
+    }).then(async data => {
+      if (data.status < 300) {
+        notes = await data.json();
+        noteStore.set(notes);
+      }
+    });
+    loadingstore.set(false)
+}
+
+
+
 
   function editAssignment(assignment) {
     editingAssignment = assignment;
@@ -229,7 +275,18 @@ function addNote(){
     loadingstore.set(false)
   }
 
-
+function setAssignmentTab(){
+  AssignmentTab="nav-link active";
+  NotesTab="nav-link";
+  getAllAssignments()
+  console.log('assignment set')
+}
+function setNoteTab(){
+  NotesTab="nav-link active";
+  AssignmentTab="nav-link";
+  getAllNotes()
+  console.log('notes set')
+}
  
 </script>
 
@@ -249,16 +306,20 @@ function addNote(){
 
 
 
-<button type="button" on:click={() => addAssignment()} onclass="btn btn-primary" data-toggle="modal" data-target="#noteModal">
-      Give New Note
-</button>
-<button type="button" on:click={() => addNote()} class="btn btn-primary" data-toggle="modal" data-target="#assignmentModal">
-      Give New Assignment
-</button>
+
  <!-- FORM SECTION  START-->
 
 
-{#if group.createdBy == $userid}
+
+{console.log('created by',group.createdBy)}
+{console.log('userid',$userid)}
+{#if group.createdBy === $userid}
+  <button type="button" on:click={() => addAssignment()} class="btn btn-primary" data-toggle="modal" data-target="#assignmentModal">
+        Give New Assignment
+  </button>
+  <button type="button" on:click={() => addNote()} class="btn btn-primary" data-toggle="modal" data-target="#noteModal">
+        Give New Note
+  </button>
   <AssignmentForm {editingAssignment} />
   <NoteForm {editingNote} />
   
@@ -268,36 +329,45 @@ function addNote(){
 
  <!-- FORM SECTION  END-->
 
-<br />
-<hr />
-<br />
+
+<ul class="nav nav-tabs my-5">
+  <li class="nav-item">
+    <a on:click={() => setAssignmentTab()} class={AssignmentTab} href="#">Assignment</a>
+  </li>
+  <li class="nav-item">
+    <a on:click={() => setNoteTab()} class={NotesTab} href="#">Notes</a>
+  </li>
+</ul>
 
 
  <!-- ASSIGNMENT SECTION  START -->
+ {#if AssignmentTab=="nav-link active"}
+    {#each $assignmentStore as assignment}
+      <div class="card my-3">
+        <div class="card-header">
+          deadline: {assignment.deadline}
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">{assignment.title}</h5>
+          <p class="card-text">{assignment.description} </p>
+          <h6 class="card-title">attachment: {assignment.file ? assignment.file : 'No file attached'}</h6>
+        
+        
+        </div>
+        <div class="row">
+          {#if group.createdBy == $userid}
+            <button on:click={() => editAssignment(assignment)} type="button" class="btn btn-outline-primary mx-1 my-2 ml-4" data-toggle="modal" data-target="#assignmentModal">Edit</button>
+            <button on:click={() => getSubmits(assignment.id)} type="button" class="btn btn-outline-success mx-1 my-2">Show submits</button>
+            <button class="btn btn-outline-danger mx-1 my-2" on:click={() => deleteAssignment(assignment.id)} type="button">Delete</button>
+          {:else}
+            <button on:click={() => selectedAssignment.set(assignment)} class="btn btn-outline-info mx-1 my-2 ml-4" data-toggle="modal" data-target="#submitModal">Submit Answer</button>
+            <button on:click={() => getSubmits(assignment.id)} class="btn btn-outline-secondary mx-1 my-2">Show submits</button>
+          {/if} 
+        </div>
+      </div>
+    {/each}
 
-<h3>Assignments</h3>
-
-{#each $assignmentStore as assignment}
-  title: {assignment.title}
-  <br />
-  description: {assignment.description}
-  <br />
-  deadline{assignment.deadline}
-  <br />
-  attachment: {assignment.file ? assignment.file : 'No file attached'}
-  <br />
-  {console.log(assignment)}
-  {#if group.createdBy == $userid}
-    <button on:click={() => editAssignment(assignment)} type="button" class="btn btn-primary" data-toggle="modal" data-target="#assignmentModal">Edit</button>
-    <button on:click={() => getSubmits(assignment.id)}>Show submits</button>
-    <button class="delete-btn" on:click={() => deleteAssignment(assignment.id)}>Delete</button>
-  {:else}
-    <button on:click={() => selectedAssignment.set(assignment)}>Submit Answer</button>
-    <button on:click={() => getSubmits(assignment.id)}>Show submits</button>
-  {/if} 
-  <br />
-  <hr />
-{/each}
+ {/if}
  <!-- ASSIGNMENT SECTION  END -->
 
 
@@ -305,9 +375,8 @@ function addNote(){
  <!-- ASSIGNMENT SUBMIT SECTION  START -->
 
 
-<h1>Assignment submissions</h1>
 {#each $submitStore as submit}
-  title: {submit.title}
+  <!-- title: {submit.title}
   <br />
   description: {submit.description}
   <br />
@@ -315,35 +384,56 @@ function addNote(){
   <br />
   <br />
   <br />
-  <hr />
+  <hr /> -->
+
+  <div class="modal fade" id="submitListModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" id="exampleModalCenterTitle">{submit.title}</h6>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        {submit.description}
+      </div>
+      <div class="modal-footer">
+        <p>attachment: {submit.file ? submit.file : 'No file attached'}</p>
+        <button type="button" class="btn btn-secondary mx-3 my-3 ml-4" data-dismiss="modal">No just kidding!</button>
+      </div>
+    </div>
+  </div>
+</div>
 {/each}
+
 
  <!-- ASSIGNMENT SUBMIT SECTION  END -->
 
  <!-- NOTES SECTION  START -->
 
-<br />
-<hr />
-<br />
-<h3>Notes</h3>
+ {#if NotesTab=="nav-link active"}
+    {#each $noteStore as note}
+      <div class="card my-3">
+        <div class="card-header">
+          deadline: {note.date_updated}
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">{note.title}</h5>
+          <p class="card-text">{note.description} </p>
+          <h6 class="card-title">attachment: {note.file ? note.file : 'No file attached'}</h6>
+        </div>
+        <div class="row">
+          {#if group.createdBy == $userid}
+            <button on:click={() => editNote(note)} type="button" class="btn btn-outline-primary mx-1" data-toggle="modal" data-target="#assignmentModal">Edit</button>
+            <button class="btn btn-outline-danger mx-1" on:click={() => deleteNote(note.id)} type="button">Delete</button>
+          {/if} 
+        </div>
+      </div>
+    {/each}
+ {/if}
 
-{#each $noteStore as note}
-  title: {note.title}
-  <br />
-  description: {note.description}
-  <br />
-  attachment: {note.file ? note.file : 'No file attached'}
-  <br />
-  {#if group.createdBy == $userid}
-  <button on:click={() => editNote(note)}>Edit</button>
-  <br />
-  <button class="delete-btn" on:click={() => deleteNote(note.id)}>
-    Delete
-  </button>
-  {/if}
-  <br />
-  <hr />
-{/each}
+
 
 
 
