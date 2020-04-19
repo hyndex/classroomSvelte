@@ -14,7 +14,8 @@
   // import jQuery from '../node_modules/jquery/dist/jquery.min.js'
   // import '../node_modules/bulma-start/css/main.css'
 
-  import { Router, Route } from "svelte-routing";
+  import { Router, Route, navigate } from "svelte-routing";
+  import { onMount } from "svelte";
   import Navbar from "./layout/Navbar.svelte";
   import Home from "./pages/Home.svelte";
   import Class from "./pages/Class.svelte";
@@ -40,11 +41,23 @@
 	selectedSubmit,
 	validate,
   } from "./store/stores.js";
+  // onMount(async () => {
+  //   if($validate==false){
+  //     {navigate("/log", { replace: true })}
+  //   }
+  // });
 </script>
 
 <style>
 
 </style>
+{#if $authtoken == false}
+  {navigate("/log", { replace: true })}
+  
+  {:else}
+     {navigate("/home", { replace: true })}
+{/if}
+
 
 <Router>
   <Navbar />
@@ -54,5 +67,6 @@
     <Route path="/class" component={Class} />
     <Route path="/profile" component={Profile} />
     <Route path="/home" component={Home} />
+    <Route component={Log} />
   </div>
 </Router>

@@ -44,7 +44,44 @@
     groupid: null
   };
   let gotoGroupstatus = false;
+
+  async function validateToken() {
+    authtoken.set(new Cookies().get("token"));
+    loadingstore.set(true);
+    fetch($server + "/users/profile/", {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-type": "application/json",
+        Accept: "application/json",
+        Authorization: "Token " + $authtoken
+      }
+    }).then(async data => {
+      if (data.status < 300) {
+        let response = await data.json();
+        response = response[0];
+        username.set(response.user.username);
+        name.set(response.name);
+        phone.set(response.phone);
+        email.set(response.user.email);
+        userid.set(response.id);
+        validate.set(true);
+      } else {
+        authtoken.set(false);
+        username.set(false);
+        email.set(false);
+        phone.set(false);
+        name.set(false);
+      }
+    });
+    loadingstore.set(false);
+  }
+
+
   onMount(async () => {
+    if($validate==false){
+      validateToken()
+    }
     selectedGroup.set(false);
     // authtoken.set(new Cookies.get('token'));
     loadingstore.set(true)

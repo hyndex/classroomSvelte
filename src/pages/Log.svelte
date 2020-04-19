@@ -1,6 +1,6 @@
 <script>
   import Cookies from "universal-cookie";
-  import { Router, Route } from "svelte-routing";
+  import { Router, Route, navigate } from "svelte-routing";
   import Home from "./Home.svelte";
   import {
     server,
@@ -185,12 +185,13 @@
 
 </style>
 
-{#if $validate == true}
-  <Router>
-    <Route path="/" component={Home} />
-  </Router>
-{/if}
-
+<!-- {#if $validate == true}
+  {navigate("/home", { replace: true })}
+  
+{/if} -->
+<!-- <Router>
+    <Route path="/home" component={Home} />
+  </Router> -->
 <!-- Sign Up Modal -->
 <div
   class="modal fade"
