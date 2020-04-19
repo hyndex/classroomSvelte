@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 
 function url() {
-	const { subscribe } = writable('http://127.0.0.1:8000');
+	const { subscribe } = writable('https://087f178e.ngrok.io');
 
 	return {
 		subscribe,

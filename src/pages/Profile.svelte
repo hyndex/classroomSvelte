@@ -37,7 +37,7 @@
   onMount(async () => {
     authtoken.set(new Cookies().get("token"));
     loadingstore.set(true)
-    fetch("http://localhost:8000/users/profile/", {
+    fetch(apiBaseUrl+"/users/profile/", {
       method: "GET",
       credentials: "include",
       headers: {
@@ -70,7 +70,7 @@
   async function validateToken() {
     authtoken.set(new Cookies().get("token"));
     loadingstore.set(true)
-    fetch("http://localhost:8000/users/profile/", {
+    fetch(apiBaseUrl+"/users/profile/", {
       method: "GET",
       credentials: "include",
       headers: {

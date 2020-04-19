@@ -137,7 +137,7 @@
   async function logOut() {
     console.log("inlogout");
     loadingstore.set(true);
-    fetch("http://localhost:8000/users/logout/", {
+    fetch(apiBaseUrl+"/users/logout/", {
       method: "POST",
       credentials: "include",
       body: JSON.stringify({}),
