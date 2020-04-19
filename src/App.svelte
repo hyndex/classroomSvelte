@@ -51,12 +51,12 @@
 <style>
 
 </style>
-{#if $authtoken == false}
+<!-- {#if $authtoken == false}
   {navigate("/log", { replace: true })}
   
   {:else}
      {navigate("/home", { replace: true })}
-{/if}
+{/if} -->
 
 
 <Router>

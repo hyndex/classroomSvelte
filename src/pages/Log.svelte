@@ -185,10 +185,10 @@
 
 </style>
 
-<!-- {#if $validate == true}
+{#if $validate == true}
   {navigate("/home", { replace: true })}
   
-{/if} -->
+{/if}
 <!-- <Router>
     <Route path="/home" component={Home} />
   </Router> -->
