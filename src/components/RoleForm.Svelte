@@ -10,7 +10,7 @@
     name,
     email,
     phone,
-    status,
+    status, 
     isGroupOwner,
     selectedGroup,
     selectedAssignment,
